@@ -1,9 +1,7 @@
-#include <lib/micropython/lib/micropython-build/port/micropython_embed.h>
+#include <mp_flipper.h>
 #include <storage/storage.h>
 #include <cli/cli.h>
 #include <furi.h>
-
-#include "mphalport.h"
 
 #define TAG "py app"
 
@@ -79,13 +77,13 @@ void py_cli_execute(Cli* cli, FuriString* args, void* context) {
 
         furi_string_left(file_path, index);
 
-        root_module_path = furi_string_get_cstr(file_path);
+        mp_flipper_set_root_module_path(furi_string_get_cstr(file_path));
 
         printf("%s", furi_string_get_cstr(code));
 
-        mp_embed_init(memory + stack_size, memory_size - stack_size, memory);
-        mp_embed_exec_str(furi_string_get_cstr(code));
-        mp_embed_deinit();
+        mp_flipper_init(memory + stack_size, memory_size - stack_size, memory);
+        mp_flipper_exec_str(furi_string_get_cstr(code));
+        mp_flipper_deinit();
 
         furi_string_free(code);
         free(memory);

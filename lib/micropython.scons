@@ -2,13 +2,10 @@ Import("env")
 
 env.Append(
     CPPPATH=[
-        "#/lib/micropython/lib/micropython-build",
         "#/lib/micropython",
     ],
     SDK_HEADERS=[],
-    CPPDEFINES=[
-
-    ],
+    CPPDEFINES=[],
     CFLAGS=[
         "-Wno-error",
         "-w",
@@ -23,7 +20,7 @@ libenv.Append(
     ],
 )
 
-sources = libenv.GlobRecursive("*.c*", "micropython/lib/micropython-build")
+sources = libenv.GlobRecursive("*.c*", "micropython")
 
 lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)
