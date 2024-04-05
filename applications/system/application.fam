@@ -8,6 +8,7 @@ App(
         "js_app",
         "js_app_start",
         "py_app_start",
+        "py_app_repl_start",
         # "archive",
     ],
 )

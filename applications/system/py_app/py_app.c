@@ -5,8 +5,6 @@
 
 #define TAG "py app"
 
-char* root_module_path;
-
 static void load_python_file(const char* file_path, FuriString* code) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
@@ -44,7 +42,7 @@ void py_cli_execute(Cli* cli, FuriString* args, void* context) {
 
     do {
         if(furi_string_size(args) == 0) {
-            printf("Usage:\r\njs <path>\r\n");
+            printf("Usage:\r\npy <path>\r\n");
             break;
         }
 
@@ -55,16 +53,14 @@ void py_cli_execute(Cli* cli, FuriString* args, void* context) {
 
         furi_record_close(RECORD_STORAGE);
 
-        FuriSemaphore* sem = furi_semaphore_alloc(1, 0);
-
         printf("Running script %s, press CTRL+C to stop\r\n", path);
 
         const size_t memory_size = memmgr_get_free_heap() * 0.5;
         const size_t stack_size = 2 * 1024;
         uint8_t* memory = malloc(memory_size * sizeof(uint8_t));
 
-        printf("allocated memory is %zu bytes\n", memory_size);
-        printf("stack size is %zu bytes\n", stack_size);
+        printf("allocated memory is %zu bytes\r\n", memory_size);
+        printf("stack size is %zu bytes\r\n", stack_size);
 
         FuriString* file_path = args;
         FuriString* code = furi_string_alloc();
@@ -87,12 +83,6 @@ void py_cli_execute(Cli* cli, FuriString* args, void* context) {
 
         furi_string_free(code);
         free(memory);
-
-        while(furi_semaphore_acquire(sem, 100) != FuriStatusOk) {
-            if(cli_cmd_interrupt_received(cli)) break;
-        }
-
-        furi_semaphore_free(sem);
     } while(false);
 }
 
