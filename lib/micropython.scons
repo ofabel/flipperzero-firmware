@@ -1,0 +1,30 @@
+Import("env")
+
+env.Append(
+    CPPPATH=[
+        "#/lib/micropython/lib/micropython-build",
+        "#/lib/micropython",
+    ],
+    SDK_HEADERS=[],
+    CPPDEFINES=[
+
+    ],
+    CFLAGS=[
+        "-Wno-error",
+        "-w",
+    ]
+)
+
+libenv = env.Clone(FW_LIB_NAME="micropython")
+libenv.ApplyLibFlags()
+libenv.Append(
+    CDEFINES=[
+        ("MP_CONFIGFILE", "mpconfigport.h"),
+    ],
+)
+
+sources = libenv.GlobRecursive("*.c*", "micropython/lib/micropython-build")
+
+lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
+libenv.Install("${LIB_DIST_DIR}", lib)
+Return("lib")

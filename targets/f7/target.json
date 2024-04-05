@@ -53,6 +53,7 @@
         "flipperformat",
         "flipper7",
         "bit_lib",
-        "datetime"
+        "datetime",
+        "micropython"
     ]
 }

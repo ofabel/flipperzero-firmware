@@ -1,3 +1,6 @@
+[submodule "lib/micropython"]
+	path = lib/micropython
+	url = https://github.com/ofabel/mp-flipper.git
 [submodule "lib/mlib"]
 	path = lib/mlib
 	url = https://github.com/P-p-H-d/mlib.git
@@ -37,7 +40,7 @@
 	url = https://github.com/STMicroelectronics/stm32wbxx_hal_driver
 [submodule "lib/stm32wb_copro"]
 	path = lib/stm32wb_copro
-    url = https://github.com/flipperdevices/stm32wb_copro.git
+  url = https://github.com/flipperdevices/stm32wb_copro.git
 [submodule "documentation/doxygen/doxygen-awesome-css"]
 	path = documentation/doxygen/doxygen-awesome-css
 	url = https://github.com/jothepro/doxygen-awesome-css.git
