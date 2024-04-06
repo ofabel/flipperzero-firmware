@@ -6,15 +6,82 @@
 #include <furi.h>
 
 #define TAG "py repl"
+#define PSX(is_ps2) (is_ps2 ? "... " : ">>> ")
+#define AUTOCOMPLETE_MANY_MATCHES (size_t)(-1)
+#define HISTORY_SIZE 16
 
-inline static int8_t handle_escape(char character, size_t cursor, FuriString* line) {
-    // left arrow
-    if(character == 'D' && cursor > 0) {
-        printf("\e[D");
+typedef struct {
+    FuriString** stack;
+    size_t pointer;
+    size_t size;
+} py_repl_history_t;
+
+static py_repl_history_t* py_repl_history_alloc() {
+    py_repl_history_t* history = malloc(sizeof(py_repl_history_t));
+
+    history->stack = malloc(HISTORY_SIZE * sizeof(FuriString*));
+    history->pointer = 0;
+    history->size = 1;
+
+    for(size_t i = 0; i < HISTORY_SIZE; i++) {
+        history->stack[i] = furi_string_alloc();
+    }
+
+    return history;
+}
+
+static void py_repl_history_free(py_repl_history_t* history) {
+    for(size_t i = 0; i < HISTORY_SIZE; i++) {
+        furi_string_free(history->stack[i]);
+    }
+
+    free(history);
+}
+
+static void mp_flipper_print(FuriString* data, const char* str, size_t len) {
+    for(size_t i = 0; i < len; i++) {
+        furi_string_push_back(data, str[i]);
+    }
+}
+
+inline static int32_t handle_arrow_keys(
+    char character,
+    size_t cursor,
+    bool is_ps2,
+    FuriString* line,
+    py_repl_history_t* history) {
+    // up arrow
+    if(character == 'A' && history->pointer == 0) {
+        furi_string_set(history->stack[0], line);
+    }
+
+    if(character == 'A' && history->pointer < history->size) {
+        history->pointer += (history->pointer + 1) == history->size ? 0 : 1;
+
+        furi_string_set(line, history->stack[history->pointer]);
+
+        printf("\33[2K\r");
+        printf(PSX(is_ps2));
+        printf(furi_string_get_cstr(line));
 
         fflush(stdout);
 
-        return -1;
+        return furi_string_size(line);
+    }
+
+    // down arrow
+    if(character == 'B' && history->pointer > 0) {
+        history->pointer--;
+
+        furi_string_set(line, history->stack[history->pointer]);
+
+        printf("\33[2K\r");
+        printf(PSX(is_ps2));
+        printf(furi_string_get_cstr(line));
+
+        fflush(stdout);
+
+        return furi_string_size(line);
     }
 
     // right arrow
@@ -23,10 +90,67 @@ inline static int8_t handle_escape(char character, size_t cursor, FuriString* li
 
         fflush(stdout);
 
-        return 1;
+        return cursor + 1;
     }
 
-    return 0;
+    // left arrow
+    if(character == 'D' && cursor > 0) {
+        printf("\e[D");
+
+        fflush(stdout);
+
+        return cursor - 1;
+    }
+
+    return cursor;
+}
+
+inline static int32_t handle_backspace(size_t cursor, FuriString* line) {
+    // skip backspace at begin of line
+    if(cursor == 0) {
+        return 0;
+    }
+
+    printf("\e[D\e[1P");
+
+    fflush(stdout);
+
+    furi_string_left(line, furi_string_size(line) - 1);
+
+    return -1;
+}
+
+inline static int32_t handle_autocomplete(Cli* cli, bool is_ps2, size_t cursor, FuriString* line) {
+    const char* line_str = furi_string_get_cstr(line);
+
+    mp_print_t* print = malloc(sizeof(mp_print_t));
+
+    char* compl_str = malloc(128 * sizeof(char));
+
+    print->data = furi_string_alloc();
+    print->print_strn = mp_flipper_print;
+
+    size_t len = mp_repl_autocomplete(line_str, furi_string_size(line), print, &compl_str);
+
+    if(len != AUTOCOMPLETE_MANY_MATCHES) {
+        for(size_t i = 0; i < len; i++) {
+            cli_putc(cli, compl_str[i]);
+
+            furi_string_push_back(line, compl_str[i]);
+        }
+    } else {
+        printf("%s", furi_string_get_cstr(print->data));
+        printf(PSX(is_ps2));
+        printf("%s", line_str);
+
+        fflush(stdout);
+    }
+
+    furi_string_free(print->data);
+    free(compl_str);
+    free(print);
+
+    return len == AUTOCOMPLETE_MANY_MATCHES ? 0 : len;
 }
 
 void py_cli_repl_execute(Cli* cli, FuriString* args, void* context) {
@@ -41,6 +165,10 @@ void py_cli_repl_execute(Cli* cli, FuriString* args, void* context) {
 
     FuriString* code = furi_string_alloc();
     FuriString* line = furi_string_alloc();
+
+    py_repl_history_t* history = py_repl_history_alloc();
+
+    char* line_str = furi_string_get_cstr(line);
     char* code_str = furi_string_get_cstr(code);
 
     mp_flipper_set_root_module_path("/ext");
@@ -55,12 +183,14 @@ void py_cli_repl_execute(Cli* cli, FuriString* args, void* context) {
 
     do {
         do {
-            cli_write(cli, is_ps2 ? "... " : ">>> ", 4);
+            cli_write(cli, PSX(is_ps2), 4);
 
             furi_string_reset(line);
             cursor = 0;
 
             do {
+                line_str = furi_string_get_cstr(line);
+
                 character = cli_getc(cli);
 
                 // ctrl + c
@@ -93,29 +223,26 @@ void py_cli_repl_execute(Cli* cli, FuriString* args, void* context) {
                     break;
                 }
 
+                // handle arrow keys
                 if(character >= 0x18 && character <= 0x1B) {
                     character = cli_getc(cli);
                     character = cli_getc(cli);
 
-                    cursor += handle_escape(character, cursor, line);
+                    cursor = handle_arrow_keys(character, cursor, is_ps2, line, history);
 
                     continue;
                 }
 
-                // skip backspace at begin of line
-                if(character == CliSymbolAsciiBackspace && cursor == 0) {
+                // handle tab, do autocompletion
+                if(character == CliSymbolAsciiTab) {
+                    cursor += handle_autocomplete(cli, is_ps2, cursor, line);
+
                     continue;
                 }
 
                 // handle backspace
-                if(character == CliSymbolAsciiBackspace && cursor > 0) {
-                    printf("\e[D\e[1P");
-
-                    fflush(stdout);
-
-                    furi_string_left(line, furi_string_size(line) - 1);
-
-                    cursor--;
+                if(character == CliSymbolAsciiBackspace) {
+                    cursor += handle_backspace(cursor, line);
 
                     continue;
                 }
@@ -148,8 +275,20 @@ void py_cli_repl_execute(Cli* cli, FuriString* args, void* context) {
                 break;
             }
 
-            code_str = furi_string_get_cstr(code);
+            if(furi_string_size(line) > 0) {
+                history->size += history->size == HISTORY_SIZE ? 0 : 1;
 
+                for(size_t i = history->size - 1; i > 1; i--) {
+                    furi_string_set(history->stack[i], history->stack[i - 1]);
+                }
+
+                furi_string_set(history->stack[1], line);
+                furi_string_reset(history->stack[0]);
+            }
+
+            history->pointer = 0;
+
+            code_str = furi_string_get_cstr(code);
         } while(is_ps2 = !furi_string_empty(line) && mp_repl_continue_with_input(code_str));
 
         // ctrl + c
@@ -166,7 +305,11 @@ void py_cli_repl_execute(Cli* cli, FuriString* args, void* context) {
 
     mp_flipper_deinit();
 
+    py_repl_history_free(history);
+
+    furi_string_free(line);
     furi_string_free(code);
+
     free(memory);
 }
 
