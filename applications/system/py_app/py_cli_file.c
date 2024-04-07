@@ -34,11 +34,13 @@ bool load_python_file(const char* file_path, FuriString* code) {
 }
 
 void py_cli_file_execute(Cli* cli, FuriString* args, void* context) {
+    size_t stack;
     UNUSED(context);
 
     const char* path = furi_string_get_cstr(args);
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FuriString* code = furi_string_alloc();
+    FuriString* file_path = furi_string_alloc_printf("%s", args);
 
     do {
         if(!storage_file_exists(storage, path)) {
@@ -48,8 +50,6 @@ void py_cli_file_execute(Cli* cli, FuriString* args, void* context) {
         }
 
         furi_record_close(RECORD_STORAGE);
-
-        FuriString* file_path = args;
 
         if(!load_python_file(path, code)) {
             printf("Cannot open file: %s\r\n", path);
@@ -74,12 +74,13 @@ void py_cli_file_execute(Cli* cli, FuriString* args, void* context) {
 
         mp_flipper_set_root_module_path(furi_string_get_cstr(file_path));
 
-        mp_flipper_init(memory + stack_size, memory_size - stack_size, memory);
-        mp_flipper_exec_str(furi_string_get_cstr(code));
+        mp_flipper_init(memory, memory_size, stack_size, &stack);
+        mp_flipper_exec_file(furi_string_get_cstr(code), path);
         mp_flipper_deinit();
 
         free(memory);
     } while(false);
 
+    furi_string_free(file_path);
     furi_string_free(code);
 }

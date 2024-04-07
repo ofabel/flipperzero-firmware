@@ -74,73 +74,62 @@ static void print_full_psx(py_repl_context_t* context) {
 
     for(size_t i = context->cursor; i < furi_string_size(context->line); i++) {
         printf("\e[D");
-
-        fflush(stdout);
     }
 
     fflush(stdout);
 }
 
-static void mp_flipper_print(FuriString* data, const char* str, size_t len) {
-    for(size_t i = 0; i < len; i++) {
-        furi_string_push_back(data, str[i]);
-    }
+static void print_strn_autocompletion(FuriString* data, const char* str, size_t len) {
+    furi_string_cat_printf(data, "%.*s", len, str);
 }
 
 inline static void handle_arrow_keys(char character, py_repl_context_t* context) {
     py_repl_history_t* history = context->history;
 
-    // up arrow
-    if(character == 'A' && history->pointer == 0) {
-        furi_string_set(history->stack[0], context->line);
-    }
+    do {
+        bool update_by_history = false;
+        // up arrow
+        if(character == 'A' && history->pointer == 0) {
+            furi_string_set(history->stack[0], context->line);
+        }
 
-    if(character == 'A' && history->pointer < history->size) {
-        history->pointer += (history->pointer + 1) == history->size ? 0 : 1;
+        if(character == 'A' && history->pointer < history->size) {
+            history->pointer += (history->pointer + 1) == history->size ? 0 : 1;
 
-        furi_string_set(context->line, history->stack[history->pointer]);
+            update_by_history = true;
+        }
 
-        context->cursor = furi_string_size(context->line);
+        // down arrow
+        if(character == 'B' && history->pointer > 0) {
+            history->pointer--;
 
-        print_full_psx(context);
+            update_by_history = true;
+        }
 
-        return;
-    }
+        if(update_by_history) {
+            furi_string_set(context->line, history->stack[history->pointer]);
 
-    // down arrow
-    if(character == 'B' && history->pointer > 0) {
-        history->pointer--;
+            context->cursor = furi_string_size(context->line);
 
-        furi_string_set(context->line, history->stack[history->pointer]);
+            break;
+        }
 
-        context->cursor = furi_string_size(context->line);
+        // right arrow
+        if(character == 'C' && context->cursor != furi_string_size(context->line)) {
+            context->cursor++;
 
-        print_full_psx(context);
+            break;
+        }
 
-        return;
-    }
+        // left arrow
+        if(character == 'D' && context->cursor > 0) {
+            context->cursor--;
 
-    // right arrow
-    if(character == 'C' && context->cursor != furi_string_size(context->line)) {
-        printf("\e[C");
+            break;
+        }
+    } while(false);
 
-        fflush(stdout);
-
-        context->cursor++;
-
-        return;
-    }
-
-    // left arrow
-    if(character == 'D' && context->cursor > 0) {
-        printf("\e[D");
-
-        fflush(stdout);
-
-        context->cursor--;
-
-        return;
-    }
+    print_full_psx(context);
 }
 
 inline static void handle_backspace(py_repl_context_t* context) {
@@ -149,16 +138,40 @@ inline static void handle_backspace(py_repl_context_t* context) {
         return;
     }
 
+    const char* line = furi_string_get_cstr(context->line);
+    size_t before = context->cursor - 1;
+    size_t after = furi_string_size(context->line) - context->cursor;
+
+    furi_string_printf(context->line, "%.*s%.*s", before, line, after, line + context->cursor);
+
+    context->cursor--;
+
     printf("\e[D\e[1P");
 
     fflush(stdout);
-
-    furi_string_left(context->line, furi_string_size(context->line) - 1);
-
-    context->cursor--;
 }
 
-inline static void handle_autocomplete(Cli* cli, py_repl_context_t* context) {
+inline static bool is_indent_required(py_repl_context_t* context) {
+    for(size_t i = 0; context->is_ps2 && i < context->cursor; i++) {
+        if(furi_string_get_char(context->line, i) != ' ') {
+            return false;
+        }
+    }
+
+    return context->is_ps2;
+}
+
+inline static void handle_autocomplete(py_repl_context_t* context) {
+    // check if ps2 is active and just a tab character is required
+    if(is_indent_required(context)) {
+        furi_string_replace_at(context->line, context->cursor, 0, "    ");
+        context->cursor += 4;
+
+        print_full_psx(context);
+
+        return;
+    }
+
     const char* new_line = furi_string_get_cstr(context->line);
     FuriString* orig_line = furi_string_alloc_printf("%s", new_line);
     const char* orig_line_str = furi_string_get_cstr(orig_line);
@@ -167,7 +180,7 @@ inline static void handle_autocomplete(Cli* cli, py_repl_context_t* context) {
     mp_print_t* print = malloc(sizeof(mp_print_t));
 
     print->data = furi_string_alloc();
-    print->print_strn = mp_flipper_print;
+    print->print_strn = print_strn_autocompletion;
 
     size_t length = mp_repl_autocomplete(new_line, context->cursor, print, &completion);
 
@@ -187,19 +200,11 @@ inline static void handle_autocomplete(Cli* cli, py_repl_context_t* context) {
                 orig_line_str + context->cursor);
 
             context->cursor += length;
-
-            print_full_psx(context);
-
-            break;
-        }
-
-        if(length == AUTOCOMPLETE_MANY_MATCHES) {
+        } else {
             printf("%s", furi_string_get_cstr(print->data));
-
-            print_full_psx(context);
-
-            break;
         }
+
+        print_full_psx(context);
     } while(false);
 
     furi_string_free(print->data);
@@ -211,7 +216,7 @@ inline static void handle_autocomplete(Cli* cli, py_repl_context_t* context) {
 inline static void update_history(py_repl_context_t* context) {
     py_repl_history_t* history = context->history;
 
-    if(furi_string_size(context->line) > 0) {
+    if(!furi_string_empty(context->line) && !furi_string_equal(context->line, history->stack[1])) {
         history->size += history->size == HISTORY_SIZE ? 0 : 1;
 
         for(size_t i = history->size - 1; i > 1; i--) {
@@ -219,8 +224,9 @@ inline static void update_history(py_repl_context_t* context) {
         }
 
         furi_string_set(history->stack[1], context->line);
-        furi_string_reset(history->stack[0]);
     }
+
+    furi_string_reset(history->stack[0]);
 
     history->pointer = 0;
 }
@@ -238,6 +244,8 @@ inline static bool continue_with_input(py_repl_context_t* context) {
 }
 
 void py_cli_repl_execute(Cli* cli, FuriString* args, void* ctx) {
+    size_t stack;
+
     UNUSED(args);
     UNUSED(ctx);
 
@@ -246,12 +254,12 @@ void py_cli_repl_execute(Cli* cli, FuriString* args, void* ctx) {
     uint8_t* memory = malloc(memory_size * sizeof(uint8_t));
 
     printf("MicroPython (%s, %s) on Flipper Zero\r\n", MICROPY_GIT_TAG, MICROPY_BUILD_DATE);
-    printf("Allocated memory is %zu bytes, stack size is %zu bytes\r\n", memory_size, stack_size);
+    printf("Quit: Ctrl+D | Heap: %zu bytes | Stack: %zu bytes\r\n", memory_size, stack_size);
 
     py_repl_context_t* context = py_repl_context_alloc();
 
     mp_flipper_set_root_module_path("/ext");
-    mp_flipper_init(memory + stack_size, memory_size - stack_size, memory);
+    mp_flipper_init(memory, memory_size, stack_size, &stack);
 
     char character = '\0';
 
@@ -330,7 +338,7 @@ void py_cli_repl_execute(Cli* cli, FuriString* args, void* ctx) {
 
                 // handle tab, do autocompletion
                 if(character == CliSymbolAsciiTab) {
-                    handle_autocomplete(cli, context);
+                    handle_autocomplete(context);
 
                     continue;
                 }
