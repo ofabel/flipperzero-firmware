@@ -7,8 +7,7 @@ App(
         "storage_move_to_sd",
         "js_app",
         "js_app_start",
-        "py_app_start",
-        "py_app_repl_start",
+        "py_cli_start",
         # "archive",
     ],
 )
