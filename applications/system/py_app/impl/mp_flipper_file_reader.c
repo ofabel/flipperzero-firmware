@@ -6,6 +6,8 @@
 #include <mp_flipper.h>
 #include <mp_flipper_file_reader.h>
 
+#include "mp_flipper_file_helper.h"
+
 typedef struct {
     size_t pointer;
     FuriString* content;
@@ -13,13 +15,20 @@ typedef struct {
 } FileReaderContext;
 
 inline void* mp_flipper_file_reader_context_alloc(const char* filename) {
-    FuriString* file_path = furi_string_alloc();
+    FuriString* file_path = furi_string_alloc_printf("%s", filename);
+
+    if(mp_flipper_try_resolve_filesystem_path(file_path) == MP_FLIPPER_IMPORT_STAT_NO_EXIST) {
+        furi_string_free(file_path);
+
+        furi_crash("file does not exist");
+    }
+
     Storage* storage = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(storage);
 
-    furi_string_printf(file_path, "%s/%s", mp_flipper_root_module_path, filename);
-
     if(!storage_file_open(file, furi_string_get_cstr(file_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+        storage_file_free(file);
+
         furi_crash("unable to open file");
     }
 
@@ -40,6 +49,8 @@ inline void* mp_flipper_file_reader_context_alloc(const char* filename) {
     storage_file_free(file);
     furi_record_close(RECORD_STORAGE);
     furi_string_free(file_path);
+
+    return ctx;
 }
 
 inline uint32_t mp_flipper_file_reader_read(void* data) {
