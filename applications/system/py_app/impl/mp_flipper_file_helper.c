@@ -41,7 +41,7 @@ mp_flipper_import_stat_t mp_flipper_try_resolve_filesystem_path(FuriString* path
     }
     // abort on error
     else if(error != FSE_OK) {
-        furi_crash("unable to stat file");
+        mp_flipper_raise_os_error_with_filename(MP_ENOENT, furi_string_get_cstr(path));
     }
     // path points to directory
     else if((info.flags & FSF_DIRECTORY) == FSF_DIRECTORY) {

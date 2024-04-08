@@ -15,40 +15,42 @@ typedef struct {
 } FileReaderContext;
 
 inline void* mp_flipper_file_reader_context_alloc(const char* filename) {
-    FuriString* file_path = furi_string_alloc_printf("%s", filename);
-
-    if(mp_flipper_try_resolve_filesystem_path(file_path) == MP_FLIPPER_IMPORT_STAT_NO_EXIST) {
-        furi_string_free(file_path);
-
-        furi_crash("file does not exist");
-    }
-
+    FuriString* path = furi_string_alloc_printf("%s", filename);
     Storage* storage = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(storage);
+    FileReaderContext* ctx = NULL;
 
-    if(!storage_file_open(file, furi_string_get_cstr(file_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
-        storage_file_free(file);
+    do {
+        if(mp_flipper_try_resolve_filesystem_path(path) == MP_FLIPPER_IMPORT_STAT_NO_EXIST) {
+            furi_string_free(path);
 
-        furi_crash("unable to open file");
-    }
+            mp_flipper_raise_os_error_with_filename(MP_ENOENT, filename);
+        }
 
-    FileReaderContext* ctx = malloc(sizeof(FileReaderContext));
+        if(!storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+            storage_file_free(file);
 
-    ctx->pointer = 0;
-    ctx->content = furi_string_alloc();
-    ctx->size = storage_file_size(file);
+            mp_flipper_raise_os_error_with_filename(MP_ENOENT, filename);
+        }
 
-    char character = '\0';
+        ctx = malloc(sizeof(FileReaderContext));
 
-    for(size_t i = 0; i < ctx->size; i++) {
-        storage_file_read(file, &character, 1);
+        ctx->pointer = 0;
+        ctx->content = furi_string_alloc();
+        ctx->size = storage_file_size(file);
 
-        furi_string_push_back(ctx->content, character);
-    }
+        char character = '\0';
+
+        for(size_t i = 0; i < ctx->size; i++) {
+            storage_file_read(file, &character, 1);
+
+            furi_string_push_back(ctx->content, character);
+        }
+    } while(false);
 
     storage_file_free(file);
     furi_record_close(RECORD_STORAGE);
-    furi_string_free(file_path);
+    furi_string_free(path);
 
     return ctx;
 }
