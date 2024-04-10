@@ -47,7 +47,10 @@ void* mp_flipper_print_data_alloc() {
 }
 
 void mp_flipper_print_strn(void* data, const char* str, size_t length) {
-    furi_string_cat_printf(data, "%.*s", length, str);
+    for(size_t i = 0; i < length; i++) {
+        furi_string_push_back(data, str[i]);
+    }
+    //furi_string_cat_printf(data, "%.*s", length, str); <-- only works for non binary strings
 }
 
 void mp_flipper_print_data_free(void* data) {

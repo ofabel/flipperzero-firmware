@@ -10,7 +10,6 @@ void py_cli_file_execute(Cli* cli, FuriString* args, void* context) {
     UNUSED(context);
 
     const char* path = furi_string_get_cstr(args);
-    FuriString* code = furi_string_alloc();
     FuriString* file_path = furi_string_alloc_printf("%s", path);
 
     do {
@@ -47,5 +46,4 @@ void py_cli_file_execute(Cli* cli, FuriString* args, void* context) {
     } while(false);
 
     furi_string_free(file_path);
-    furi_string_free(code);
 }
