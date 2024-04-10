@@ -179,8 +179,8 @@ inline static void handle_autocomplete(py_repl_context_t* context) {
 
     mp_print_t* print = malloc(sizeof(mp_print_t));
 
-    print->data = furi_string_alloc();
-    print->print_strn = print_strn_autocompletion;
+    print->data = mp_flipper_print_data_alloc();
+    print->print_strn = mp_flipper_print_strn;
 
     size_t length = mp_repl_autocomplete(new_line, context->cursor, print, &completion);
 
@@ -201,13 +201,13 @@ inline static void handle_autocomplete(py_repl_context_t* context) {
 
             context->cursor += length;
         } else {
-            printf("%s", furi_string_get_cstr(print->data));
+            printf("%s", mp_flipper_print_get_data(print->data));
         }
 
         print_full_psx(context);
     } while(false);
 
-    furi_string_free(print->data);
+    mp_flipper_print_data_free(print->data);
     furi_string_free(orig_line);
     free(completion);
     free(print);

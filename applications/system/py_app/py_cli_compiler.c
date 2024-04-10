@@ -4,7 +4,7 @@
 
 #include "py_cli_i.h"
 
-void py_cli_file_execute(Cli* cli, FuriString* args, void* context) {
+void py_cli_file_compile(Cli* cli, FuriString* args, void* context) {
     size_t stack;
     UNUSED(cli);
     UNUSED(context);
@@ -12,6 +12,7 @@ void py_cli_file_execute(Cli* cli, FuriString* args, void* context) {
     const char* path = furi_string_get_cstr(args);
     FuriString* code = furi_string_alloc();
     FuriString* file_path = furi_string_alloc_printf("%s", path);
+    FuriString* mpy_file_path = furi_string_alloc_printf("%s.mpy", path);
 
     do {
         printf("Running script %s, press CTRL+C to stop\r\n", path);
@@ -36,9 +37,7 @@ void py_cli_file_execute(Cli* cli, FuriString* args, void* context) {
         mp_flipper_init(memory, memory_size, stack_size, &stack);
 
         if(is_py_file) {
-            mp_flipper_exec_py_file(path);
-        } else {
-            mp_flipper_exec_mpy_file(path);
+            mp_flipper_compile_and_save_file(path, furi_string_get_cstr(mpy_file_path));
         }
 
         mp_flipper_deinit();
@@ -46,6 +45,7 @@ void py_cli_file_execute(Cli* cli, FuriString* args, void* context) {
         free(memory);
     } while(false);
 
+    furi_string_free(mpy_file_path);
     furi_string_free(file_path);
     furi_string_free(code);
 }

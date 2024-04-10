@@ -31,6 +31,8 @@ inline void* mp_flipper_file_reader_context_alloc(const char* filename) {
             storage_file_free(file);
 
             mp_flipper_raise_os_error_with_filename(MP_ENOENT, filename);
+
+            break;
         }
 
         ctx = malloc(sizeof(FileReaderContext));
