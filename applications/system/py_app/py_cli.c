@@ -1,5 +1,7 @@
 #include <furi.h>
 
+#include <mpconfigport.h>
+
 #include "py_cli_i.h"
 
 void py_cli_execute(Cli* cli, FuriString* args, void* ctx) {
@@ -21,8 +23,15 @@ void py_cli_compiler(Cli* cli, FuriString* args, void* ctx) {
 void py_cli_on_system_start(void) {
 #ifdef SRV_CLI
     Cli* cli = furi_record_open(RECORD_CLI);
+
+#if MP_FLIPPER_IS_RUNTIME
     cli_add_command(cli, "py", CliCommandFlagDefault, py_cli_execute, NULL);
+#endif
+
+#if MP_FLIPPER_IS_COMPILER 
     cli_add_command(cli, "pyc", CliCommandFlagDefault, py_cli_compiler, NULL);
+#endif
+
     furi_record_close(RECORD_CLI);
 #endif
 }
