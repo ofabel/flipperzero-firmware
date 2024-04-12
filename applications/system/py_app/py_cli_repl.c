@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <py/repl.h>
 #include <genhdr/mpversion.h>
-#include <mp_flipper.h>
+#include <mp_flipper_compiler.h>
 #include <cli/cli.h>
 #include <furi.h>
 

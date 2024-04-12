@@ -4,8 +4,17 @@ env.Append(
     CPPPATH=[
         "#/lib/micropython",
     ],
-    SDK_HEADERS=[],
-    CPPDEFINES=[],
+    SDK_HEADERS=[
+        #File('micropython/py/reader.h'),
+        #File('micropython/py/runtime.h'),
+        #File('micropython/py/persistentcode.h'),
+        #File('micropython/mp_flipper_runtime.h'),
+    ],
+    CPPDEFINES=[
+        "MP_FLIPPER_RUNTIME",
+        "MP_FLIPPER_COMPILER",
+        ("MP_CONFIGFILE", '\\"micropython/mpconfigport.h\\"'),
+    ],
     CFLAGS=[
         "-Wno-error",
         "-w",
@@ -15,8 +24,10 @@ env.Append(
 libenv = env.Clone(FW_LIB_NAME="micropython")
 libenv.ApplyLibFlags()
 libenv.Append(
-    CDEFINES=[
-        ("MP_CONFIGFILE", "mpconfigport.h"),
+    CPPDEFINES=[
+        "MP_FLIPPER_RUNTIME",
+        "MP_FLIPPER_COMPILER",
+        ("MP_CONFIGFILE", '\\"micropython/mpconfigport.h\\"'),
     ],
 )
 

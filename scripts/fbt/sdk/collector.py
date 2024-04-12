@@ -1,3 +1,5 @@
+from re import compile
+
 from typing import List
 from .hashes import gnu_sym_hash
 
@@ -84,11 +86,21 @@ class SdkCollector:
         visitor = SdkCxxVisitor(self.symbol_manager)
         with open(file_path, "rt") as f:
             content = f.read()
+        content = self._prepare_content(content)
         parser = CxxParser(file_path, content, visitor, None)
         parser.parse()
 
     def get_api(self):
         return self.symbol_manager.api
+    
+    @staticmethod
+    def _prepare_content(content:str) -> str:
+        """
+        CxxParser cannot handle expressions like ' : (8 * 4 - 1);' this function replaces them with a simple ';'.
+        """
+        math_matcher = compile('\s\:\s\([\s\*\/\d\-\+\(\)]+\)\;')
+        return math_matcher.sub(';', content)
+
 
 
 def stringify_array_dimension(size_descr):

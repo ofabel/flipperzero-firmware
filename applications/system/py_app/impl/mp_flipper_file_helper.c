@@ -1,4 +1,4 @@
-#include <mp_flipper.h>
+#include <mp_flipper_runtime.h>
 #include <mp_flipper_halport.h>
 
 #include <furi.h>

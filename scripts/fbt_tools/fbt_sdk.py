@@ -271,6 +271,7 @@ def generate(env, **kw):
             "-D__extension__=",
             "-D__inline=inline",
             "-D__inline__=inline",
+            '-D"sizeof(size_t)=__SIZEOF_SIZE_T__"',
         ]
     )
 

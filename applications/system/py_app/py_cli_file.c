@@ -1,6 +1,6 @@
 #include <furi.h>
 
-#include <mp_flipper.h>
+#include <mp_flipper_compiler.h>
 
 #include "py_cli_i.h"
 

@@ -1,7 +1,7 @@
 #include <furi.h>
 #include <storage/storage.h>
 
-#include <mp_flipper.h>
+#include <mp_flipper_runtime.h>
 
 void mp_flipper_save_file(const char* file_path, const char* data, size_t size) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
