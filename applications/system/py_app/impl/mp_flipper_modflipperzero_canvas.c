@@ -28,3 +28,9 @@ inline void mp_flipper_canvas_update() {
 
     canvas_commit(ctx->canvas);
 }
+
+inline void mp_flipper_canvas_clear() {
+    mp_flipper_context_t* ctx = mp_flipper_context;
+
+    canvas_clear(ctx->canvas);
+}

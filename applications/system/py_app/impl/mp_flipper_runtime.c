@@ -6,22 +6,11 @@
 
 #include "mp_flipper_context.h"
 
-static void mp_flipper_on_input(InputEvent* event, void* ctx) {
-    if(event->type != InputTypeRelease) {
-        return;
-    }
+static void on_input_callback(InputEvent* event, void* ctx) {
+    uint16_t button = 1 << event->key;
+    uint16_t type = 1 << (InputKeyMAX + event->type);
 
-    printf("\r\ninput\r\n");
-    fflush(stdout);
-
-    switch(event->key) {
-    case InputKeyOk:
-        mp_flipper_on_input_ok();
-        break;
-    case InputKeyBack:
-        mp_flipper_on_input_back();
-        break;
-    }
+    mp_flipper_on_input(button, type);
 }
 
 void mp_flipper_save_file(const char* file_path, const char* data, size_t size) {
@@ -84,7 +73,7 @@ void* mp_flipper_context_alloc() {
     ctx->view_port = view_port_alloc();
 
     ctx->input_event_queue = furi_record_open(RECORD_INPUT_EVENTS);
-    ctx->input_event = furi_pubsub_subscribe(ctx->input_event_queue, mp_flipper_on_input, NULL);
+    ctx->input_event = furi_pubsub_subscribe(ctx->input_event_queue, on_input_callback, NULL);
 
     gui_add_view_port(ctx->gui, ctx->view_port, GuiLayerFullscreen);
 
