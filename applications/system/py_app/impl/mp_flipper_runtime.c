@@ -6,6 +6,24 @@
 
 #include "mp_flipper_context.h"
 
+static void mp_flipper_on_input(InputEvent* event, void* ctx) {
+    if(event->type != InputTypeRelease) {
+        return;
+    }
+
+    printf("\r\ninput\r\n");
+    fflush(stdout);
+
+    switch(event->key) {
+    case InputKeyOk:
+        mp_flipper_on_input_ok();
+        break;
+    case InputKeyBack:
+        mp_flipper_on_input_back();
+        break;
+    }
+}
+
 void mp_flipper_save_file(const char* file_path, const char* data, size_t size) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(storage);
@@ -64,9 +82,13 @@ void* mp_flipper_context_alloc() {
 
     ctx->gui = furi_record_open(RECORD_GUI);
     ctx->view_port = view_port_alloc();
-    ctx->canvas = gui_direct_draw_acquire(ctx->gui);
+
+    ctx->input_event_queue = furi_record_open(RECORD_INPUT_EVENTS);
+    ctx->input_event = furi_pubsub_subscribe(ctx->input_event_queue, mp_flipper_on_input, NULL);
 
     gui_add_view_port(ctx->gui, ctx->view_port, GuiLayerFullscreen);
+
+    ctx->canvas = gui_direct_draw_acquire(ctx->gui);
 
     return ctx;
 }
@@ -76,11 +98,14 @@ void mp_flipper_context_free(void* context) {
 
     gui_direct_draw_release(ctx->gui);
 
+    furi_pubsub_unsubscribe(ctx->input_event_queue, ctx->input_event);
+
     gui_remove_view_port(ctx->gui, ctx->view_port);
 
     view_port_free(ctx->view_port);
 
     furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_INPUT_EVENTS);
 
     free(ctx);
 }
