@@ -12,6 +12,7 @@
 #define TAG "LoaderApplications"
 
 #define JS_RUNNER_APP "JS Runner"
+#define PY_RUNNER_APP "Python Runner"
 
 struct LoaderApplications {
     FuriThread* thread;
@@ -90,6 +91,10 @@ static bool loader_applications_item_callback(
     if(furi_string_end_with(path, ".fap")) {
         return flipper_application_load_name_and_icon(
             path, loader_applications_app->storage, icon_ptr, item_name);
+    } if(furi_string_end_with(path, ".py")) {
+        path_extract_filename(path, item_name, false);
+        memcpy(*icon_ptr, icon_get_data(&I_py_script_10px), FAP_MANIFEST_MAX_ICON_SIZE);
+        return true;
     } else {
         path_extract_filename(path, item_name, false);
         memcpy(*icon_ptr, icon_get_data(&I_js_script_10px), FAP_MANIFEST_MAX_ICON_SIZE);
@@ -99,7 +104,7 @@ static bool loader_applications_item_callback(
 
 static bool loader_applications_select_app(LoaderApplicationsApp* loader_applications_app) {
     const DialogsFileBrowserOptions browser_options = {
-        .extension = ".fap|.js",
+        .extension = ".fap|.js|.py",
         .skip_assets = true,
         .icon = &I_unknown_10px,
         .hide_ext = true,
@@ -152,11 +157,14 @@ static int32_t loader_applications_thread(void* p) {
     view_holder_start(app->view_holder);
 
     while(loader_applications_select_app(app)) {
-        if(!furi_string_end_with(app->file_path, ".js")) {
-            loader_applications_start_app(app, furi_string_get_cstr(app->file_path), NULL);
-        } else {
+        if(furi_string_end_with(app->file_path, ".py")) {
+            loader_applications_start_app(
+                app, PY_RUNNER_APP, furi_string_get_cstr(app->file_path));
+        } else if(furi_string_end_with(app->file_path, ".js")) {
             loader_applications_start_app(
                 app, JS_RUNNER_APP, furi_string_get_cstr(app->file_path));
+        } else {
+            loader_applications_start_app(app, furi_string_get_cstr(app->file_path), NULL);
         }
     }
 

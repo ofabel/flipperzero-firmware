@@ -30,10 +30,11 @@ static const char* known_ext[] = {
     [ArchiveFileTypeU2f] = "?",
     [ArchiveFileTypeApplication] = ".fap",
     [ArchiveFileTypeJS] = ".js",
+    [ArchiveFileTypePython] = ".py",
     [ArchiveFileTypeUpdateManifest] = ".fuf",
     [ArchiveFileTypeFolder] = "?",
     [ArchiveFileTypeUnknown] = "*",
-    [ArchiveFileTypeAppOrJs] = ".fap|.js",
+    [ArchiveFileTypeAppOrJs] = ".fap|.js|.py",
 };
 
 static const ArchiveFileTypeEnum known_type[] = {
