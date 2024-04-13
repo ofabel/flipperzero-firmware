@@ -4,7 +4,7 @@ App(
     entry_point="py_cli_on_system_start",
     cdefines=[
         "MP_FLIPPER_RUNTIME",
-        #"MP_FLIPPER_COMPILER",
+        "MP_FLIPPER_COMPILER",
     ],
     stack_size=4 * 1024,
     order=170,

@@ -2,7 +2,7 @@
 
 #include "py_cli_i.h"
 
-void py_cli_execute(Cli* cli, FuriString* args, void* ctx) {
+static void py_cli_execute(Cli* cli, FuriString* args, void* ctx) {
     if(furi_string_empty(args)) {
         printf("Usage: py <path>");
     } else {
@@ -10,7 +10,7 @@ void py_cli_execute(Cli* cli, FuriString* args, void* ctx) {
     }
 }
 
-void py_cli_compiler(Cli* cli, FuriString* args, void* ctx) {
+static void py_cli_compiler(Cli* cli, FuriString* args, void* ctx) {
     if(furi_string_empty(args)) {
         py_cli_repl_execute(cli, args, ctx);
     } else {

@@ -1,20 +1,34 @@
 Import("env")
 
+sdk_headers = [
+    *(
+        File(f"#/lib/micropython/{name}")
+        for name in (
+            "mp_flipper_compiler.h",
+            "mp_flipper_config.h",
+            "mp_flipper_file_reader.h",
+            "mp_flipper_halport.h",
+            "mp_flipper_modflipperzero.h",
+            "mp_flipper_modrandom.h",
+            "mp_flipper_modtime.h",
+            "mp_flipper_runtime.h",
+            "mpconfigport.h",
+        )
+    ),
+]
+
+cppdefines = [
+    "MP_FLIPPER_RUNTIME",
+    "MP_FLIPPER_COMPILER",
+    ("MP_CONFIGFILE", '\\"micropython/mpconfigport.h\\"'),
+]
+
 env.Append(
     CPPPATH=[
         "#/lib/micropython",
     ],
-    SDK_HEADERS=[
-        #File('micropython/py/reader.h'),
-        #File('micropython/py/runtime.h'),
-        #File('micropython/py/persistentcode.h'),
-        #File('micropython/mp_flipper_runtime.h'),
-    ],
-    CPPDEFINES=[
-        "MP_FLIPPER_RUNTIME",
-        "MP_FLIPPER_COMPILER",
-        ("MP_CONFIGFILE", '\\"micropython/mpconfigport.h\\"'),
-    ],
+    SDK_HEADERS=[],
+    CPPDEFINES=cppdefines,
     CFLAGS=[
         "-Wno-error",
         "-w",
@@ -24,11 +38,7 @@ env.Append(
 libenv = env.Clone(FW_LIB_NAME="micropython")
 libenv.ApplyLibFlags()
 libenv.Append(
-    CPPDEFINES=[
-        "MP_FLIPPER_RUNTIME",
-        "MP_FLIPPER_COMPILER",
-        ("MP_CONFIGFILE", '\\"micropython/mpconfigport.h\\"'),
-    ],
+    CPPDEFINES=cppdefines,
 )
 
 sources = libenv.GlobRecursive("*.c*", "micropython")

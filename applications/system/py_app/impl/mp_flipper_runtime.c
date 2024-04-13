@@ -2,6 +2,9 @@
 #include <storage/storage.h>
 
 #include <mp_flipper_runtime.h>
+#include <mp_flipper_modflipperzero.h>
+
+#include "mp_flipper_context.h"
 
 void mp_flipper_save_file(const char* file_path, const char* data, size_t size) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
@@ -54,4 +57,30 @@ void mp_flipper_print_strn(void* data, const char* str, size_t length) {
 
 void mp_flipper_print_data_free(void* data) {
     furi_string_free(data);
+}
+
+void* mp_flipper_context_alloc() {
+    mp_flipper_context_t* ctx = malloc(sizeof(mp_flipper_context_t));
+
+    ctx->gui = furi_record_open(RECORD_GUI);
+    ctx->view_port = view_port_alloc();
+    ctx->canvas = gui_direct_draw_acquire(ctx->gui);
+
+    gui_add_view_port(ctx->gui, ctx->view_port, GuiLayerFullscreen);
+
+    return ctx;
+}
+
+void mp_flipper_context_free(void* context) {
+    mp_flipper_context_t* ctx = context;
+
+    gui_direct_draw_release(ctx->gui);
+
+    gui_remove_view_port(ctx->gui, ctx->view_port);
+
+    view_port_free(ctx->view_port);
+
+    furi_record_close(RECORD_GUI);
+
+    free(ctx);
 }
