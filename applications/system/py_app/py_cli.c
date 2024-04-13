@@ -4,7 +4,7 @@
 
 static void py_cli_execute(Cli* cli, FuriString* args, void* ctx) {
     if(furi_string_empty(args)) {
-        printf("Usage: py <path>");
+        py_cli_repl_execute(cli, args, ctx);
     } else {
         py_cli_file_execute(cli, args, ctx);
     }
@@ -12,7 +12,7 @@ static void py_cli_execute(Cli* cli, FuriString* args, void* ctx) {
 
 static void py_cli_compiler(Cli* cli, FuriString* args, void* ctx) {
     if(furi_string_empty(args)) {
-        py_cli_repl_execute(cli, args, ctx);
+        printf("Usage: pyc <path>");
     } else {
         py_cli_file_compile(cli, args, ctx);
     }

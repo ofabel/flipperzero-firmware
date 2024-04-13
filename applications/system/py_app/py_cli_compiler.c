@@ -14,14 +14,12 @@ void py_cli_file_compile(Cli* cli, FuriString* args, void* context) {
     FuriString* mpy_file_path = furi_string_alloc_printf("%s.mpy", path);
 
     do {
-        printf("Running script %s, press CTRL+C to stop\r\n", path);
-
         const size_t memory_size = memmgr_get_free_heap() * 0.3;
         const size_t stack_size = 2 * 1024;
         uint8_t* memory = malloc(memory_size * sizeof(uint8_t));
 
-        printf("allocated memory is %zu bytes\r\n", memory_size);
-        printf("stack size is %zu bytes\r\n", stack_size);
+        FURI_LOG_D(TAG, "allocated memory is %zu bytes", memory_size);
+        FURI_LOG_D(TAG, "stack size is %zu bytes", stack_size);
 
         size_t index = furi_string_search_rchar(file_path, '/');
 
@@ -36,7 +34,11 @@ void py_cli_file_compile(Cli* cli, FuriString* args, void* context) {
         mp_flipper_init(memory, memory_size, stack_size, &stack);
 
         if(is_py_file) {
+            printf("compiling script %s\r\n", path);
+
             mp_flipper_compile_and_save_file(path, furi_string_get_cstr(mpy_file_path));
+        } else {
+            printf("can only compile .py files\r\n");
         }
 
         mp_flipper_deinit();
