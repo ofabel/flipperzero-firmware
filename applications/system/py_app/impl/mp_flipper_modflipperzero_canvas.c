@@ -8,28 +8,71 @@
 static Align text_align_x = AlignLeft;
 static Align text_align_y = AlignTop;
 
+inline uint8_t mp_flipper_canvas_width() {
+    mp_flipper_context_t* ctx = mp_flipper_context;
+
+    return canvas_width(ctx->canvas);
+}
+
+inline uint8_t mp_flipper_canvas_height() {
+    mp_flipper_context_t* ctx = mp_flipper_context;
+
+    return canvas_height(ctx->canvas);
+}
+
+inline uint8_t mp_flipper_canvas_text_width(const char* text) {
+    mp_flipper_context_t* ctx = mp_flipper_context;
+
+    return canvas_string_width(ctx->canvas, text);
+}
+
+inline uint8_t mp_flipper_canvas_text_height() {
+    mp_flipper_context_t* ctx = mp_flipper_context;
+
+    return canvas_current_font_height(ctx->canvas);
+}
+
 inline void mp_flipper_canvas_draw_dot(uint8_t x, uint8_t y) {
     mp_flipper_context_t* ctx = mp_flipper_context;
 
     canvas_draw_dot(ctx->canvas, x, y);
 }
 
-inline void mp_flipper_canvas_draw_box(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
+inline void mp_flipper_canvas_draw_box(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t r) {
     mp_flipper_context_t* ctx = mp_flipper_context;
 
-    canvas_draw_box(ctx->canvas, x, y, width, height);
+    canvas_draw_rbox(ctx->canvas, x, y, w, h, r);
 }
 
-inline void mp_flipper_canvas_draw_frame(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
+inline void mp_flipper_canvas_draw_frame(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t r) {
     mp_flipper_context_t* ctx = mp_flipper_context;
 
-    canvas_draw_frame(ctx->canvas, x, y, width, height);
+    canvas_draw_rframe(ctx->canvas, x, y, w, h, r);
 }
 
 inline void mp_flipper_canvas_draw_line(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1) {
     mp_flipper_context_t* ctx = mp_flipper_context;
 
     canvas_draw_line(ctx->canvas, x0, y0, x1, y1);
+}
+
+inline void mp_flipper_canvas_draw_circle(uint8_t x, uint8_t y, uint8_t r) {
+    mp_flipper_context_t* ctx = mp_flipper_context;
+
+    canvas_draw_circle(ctx->canvas, x, y, r);
+}
+
+inline void mp_flipper_canvas_draw_disc(uint8_t x, uint8_t y, uint8_t r) {
+    mp_flipper_context_t* ctx = mp_flipper_context;
+
+    canvas_draw_disc(ctx->canvas, x, y, r);
+}
+
+inline void mp_flipper_canvas_set_font(uint8_t font) {
+    mp_flipper_context_t* ctx = mp_flipper_context;
+
+    canvas_set_font(
+        ctx->canvas, font == MP_FLIPPER_CANVAS_FONT_PRIMARY ? FontPrimary : FontSecondary);
 }
 
 inline void mp_flipper_canvas_set_color(uint8_t color) {
