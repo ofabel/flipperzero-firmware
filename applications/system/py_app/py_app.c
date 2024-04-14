@@ -1,6 +1,8 @@
 #include <furi.h>
 #include <storage/storage.h>
 
+#include <mp_flipper_runtime.h>
+
 #include "py_app.h"
 
 #define PYTHON_SETTINGS_VERSION 0x01
