@@ -9,16 +9,17 @@ void py_cli_file_compile(Cli* cli, FuriString* args, void* context) {
     UNUSED(cli);
     UNUSED(context);
 
+    PyApp* app = py_app_alloc();
     const char* path = furi_string_get_cstr(args);
     FuriString* file_path = furi_string_alloc_printf("%s", path);
     FuriString* mpy_file_path = furi_string_alloc_printf("%s.mpy", path);
 
     do {
-        const size_t memory_size = memmgr_get_free_heap() * 0.3;
-        const size_t stack_size = 2 * 1024;
-        uint8_t* memory = malloc(memory_size * sizeof(uint8_t));
+        const size_t heap_size = memmgr_get_free_heap() * app->heap_size;
+        const size_t stack_size = app->stack_size;
+        uint8_t* heap = malloc(heap_size * sizeof(uint8_t));
 
-        FURI_LOG_D(TAG, "allocated memory is %zu bytes", memory_size);
+        FURI_LOG_D(TAG, "allocated memory is %zu bytes", heap_size);
         FURI_LOG_D(TAG, "stack size is %zu bytes", stack_size);
 
         size_t index = furi_string_search_rchar(file_path, '/');
@@ -31,7 +32,7 @@ void py_cli_file_compile(Cli* cli, FuriString* args, void* context) {
 
         mp_flipper_set_root_module_path(furi_string_get_cstr(file_path));
 
-        mp_flipper_init(memory, memory_size, stack_size, &stack);
+        mp_flipper_init(heap, heap_size, stack_size, &stack);
 
         if(is_py_file) {
             printf("compiling script %s\r\n", path);
@@ -43,9 +44,11 @@ void py_cli_file_compile(Cli* cli, FuriString* args, void* context) {
 
         mp_flipper_deinit();
 
-        free(memory);
+        free(heap);
     } while(false);
 
     furi_string_free(mpy_file_path);
     furi_string_free(file_path);
+
+    py_app_free(app);
 }

@@ -249,17 +249,19 @@ void py_cli_repl_execute(Cli* cli, FuriString* args, void* ctx) {
     UNUSED(args);
     UNUSED(ctx);
 
-    const size_t memory_size = memmgr_get_free_heap() * 0.3;
-    const size_t stack_size = 2 * 1024;
-    uint8_t* memory = malloc(memory_size * sizeof(uint8_t));
+    PyApp* app = py_app_alloc();
+
+    const size_t heap_size = memmgr_get_free_heap() * app->heap_size;
+    const size_t stack_size = app->stack_size;
+    uint8_t* heap = malloc(heap_size * sizeof(uint8_t));
 
     printf("MicroPython (%s, %s) on Flipper Zero\r\n", MICROPY_GIT_TAG, MICROPY_BUILD_DATE);
-    printf("Quit: Ctrl+D | Heap: %zu bytes | Stack: %zu bytes\r\n", memory_size, stack_size);
+    printf("Quit: Ctrl+D | Heap: %zu bytes | Stack: %zu bytes\r\n", heap_size, stack_size);
 
     py_repl_context_t* context = py_repl_context_alloc();
 
     mp_flipper_set_root_module_path("/ext");
-    mp_flipper_init(memory, memory_size, stack_size, &stack);
+    mp_flipper_init(heap, heap_size, stack_size, &stack);
 
     char character = '\0';
 
@@ -393,5 +395,7 @@ void py_cli_repl_execute(Cli* cli, FuriString* args, void* ctx) {
 
     py_repl_context_free(context);
 
-    free(memory);
+    free(heap);
+
+    py_app_free(app);
 }

@@ -22,3 +22,13 @@ App(
     stack_size=4 * 1024,
     order=160,
 )
+
+App(
+    appid="py_settings",
+    name="Python Settings",
+    apptype=FlipperAppType.SETTINGS,
+    entry_point="py_app_settings_app",
+    requires=["notification"],
+    stack_size=1 * 1024,
+    order=90,
+)
