@@ -3,12 +3,6 @@ App(
     name="Python Runner",
     apptype=FlipperAppType.SYSTEM,
     entry_point="py_app",
-    cdefines=[
-        "MP_FLIPPER_MPY_SUPPORT",
-        "MP_FLIPPER_FIRMWARE",
-        "MP_FLIPPER_RUNTIME",
-        "MP_FLIPPER_COMPILER",
-    ],
     stack_size=4 * 1024,
     order=0,
 )
@@ -17,12 +11,6 @@ App(
     appid="py_cli_start",
     apptype=FlipperAppType.STARTUP,
     entry_point="py_cli_on_system_start",
-    cdefines=[
-        "MP_FLIPPER_MPY_SUPPORT",
-        "MP_FLIPPER_FIRMWARE",
-        "MP_FLIPPER_RUNTIME",
-        "MP_FLIPPER_COMPILER",
-    ],
     stack_size=4 * 1024,
     order=160,
 )
@@ -32,12 +20,6 @@ App(
     name="Python Settings",
     apptype=FlipperAppType.SETTINGS,
     entry_point="py_app_settings_app",
-    cdefines=[
-        "MP_FLIPPER_MPY_SUPPORT",
-        "MP_FLIPPER_FIRMWARE",
-        "MP_FLIPPER_RUNTIME",
-        "MP_FLIPPER_COMPILER",
-    ],
     stack_size=1 * 1024,
     order=90,
 )

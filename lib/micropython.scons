@@ -18,10 +18,6 @@ sdk_headers = [
 ]
 
 cppdefines = [
-    "MP_FLIPPER_MPY_SUPPORT",
-    "MP_FLIPPER_FIRMWARE",
-    "MP_FLIPPER_RUNTIME",
-    "MP_FLIPPER_COMPILER",
     ("MP_CONFIGFILE", '\\"micropython/mpconfigport.h\\"'),
 ]
 
