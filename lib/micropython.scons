@@ -31,7 +31,7 @@ env.Append(
     ],
     SDK_HEADERS=[],
     CPPDEFINES=cppdefines,
-    CFLAGS=[
+    CCFLAGS=[
         "-Wno-error",
         "-w",
     ]
