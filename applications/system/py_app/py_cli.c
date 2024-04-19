@@ -1,5 +1,7 @@
 #include <furi.h>
 
+#include <mpconfigport.h>
+
 #include "py_cli_i.h"
 
 static void py_cli_execute(Cli* cli, FuriString* args, void* ctx) {
