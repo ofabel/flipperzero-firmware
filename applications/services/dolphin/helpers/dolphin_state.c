@@ -6,18 +6,17 @@
 #include <storage/storage.h>
 #include <furi.h>
 #include <furi_hal.h>
-#include <math.h>
 #include <toolbox/saved_struct.h>
 
 #define TAG "DolphinState"
 
-#define DOLPHIN_STATE_PATH INT_PATH(DOLPHIN_STATE_FILE_NAME)
-#define DOLPHIN_STATE_HEADER_MAGIC 0xD0
+#define DOLPHIN_STATE_PATH           INT_PATH(DOLPHIN_STATE_FILE_NAME)
+#define DOLPHIN_STATE_HEADER_MAGIC   0xD0
 #define DOLPHIN_STATE_HEADER_VERSION 0x01
-#define LEVEL2_THRESHOLD 300
-#define LEVEL3_THRESHOLD 1800
-#define BUTTHURT_MAX 14
-#define BUTTHURT_MIN 0
+#define LEVEL2_THRESHOLD             300
+#define LEVEL3_THRESHOLD             1800
+#define BUTTHURT_MAX                 14
+#define BUTTHURT_MIN                 0
 
 DolphinState* dolphin_state_alloc(void) {
     return malloc(sizeof(DolphinState));

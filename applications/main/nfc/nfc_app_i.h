@@ -32,6 +32,7 @@
 #include "helpers/mfkey32_logger.h"
 #include "helpers/mf_classic_key_cache.h"
 #include "helpers/nfc_supported_cards.h"
+#include "helpers/felica_auth.h"
 #include "helpers/slix_unlock.h"
 
 #include <dialogs/dialogs.h>
@@ -60,19 +61,19 @@
 #include <toolbox/name_generator.h>
 #include <dolphin/dolphin.h>
 
-#define NFC_NAME_SIZE 22
-#define NFC_TEXT_STORE_SIZE 128
+#define NFC_NAME_SIZE             22
+#define NFC_TEXT_STORE_SIZE       128
 #define NFC_BYTE_INPUT_STORE_SIZE 10
-#define NFC_LOG_SIZE_MAX (1024)
-#define NFC_APP_FOLDER ANY_PATH("nfc")
-#define NFC_APP_EXTENSION ".nfc"
-#define NFC_APP_SHADOW_EXTENSION ".shd"
-#define NFC_APP_FILENAME_PREFIX "NFC"
+#define NFC_LOG_SIZE_MAX          (1024)
+#define NFC_APP_FOLDER            ANY_PATH("nfc")
+#define NFC_APP_EXTENSION         ".nfc"
+#define NFC_APP_SHADOW_EXTENSION  ".shd"
+#define NFC_APP_FILENAME_PREFIX   "NFC"
 
 #define NFC_APP_MFKEY32_LOGS_FILE_NAME ".mfkey32.log"
 #define NFC_APP_MFKEY32_LOGS_FILE_PATH (NFC_APP_FOLDER "/" NFC_APP_MFKEY32_LOGS_FILE_NAME)
 
-#define NFC_APP_MF_CLASSIC_DICT_USER_PATH (NFC_APP_FOLDER "/assets/mf_classic_dict_user.nfc")
+#define NFC_APP_MF_CLASSIC_DICT_USER_PATH   (NFC_APP_FOLDER "/assets/mf_classic_dict_user.nfc")
 #define NFC_APP_MF_CLASSIC_DICT_SYSTEM_PATH (NFC_APP_FOLDER "/assets/mf_classic_dict.nfc")
 
 typedef enum {
@@ -129,6 +130,7 @@ struct NfcApp {
     NfcScanner* scanner;
     NfcListener* listener;
 
+    FelicaAuthenticationContext* felica_auth;
     MfUltralightAuth* mf_ul_auth;
     SlixUnlock* slix_unlock;
     NfcMfClassicDictAttackContext nfc_dict_context;

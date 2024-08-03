@@ -5,8 +5,8 @@
 #include "desktop_settings_scene.h"
 #include "desktop_settings_scene_i.h"
 
-#define SCENE_EVENT_SET_PIN 0
-#define SCENE_EVENT_CHANGE_PIN 1
+#define SCENE_EVENT_SET_PIN     0
+#define SCENE_EVENT_CHANGE_PIN  1
 #define SCENE_EVENT_DISABLE_PIN 2
 
 static void desktop_settings_scene_pin_menu_submenu_callback(void* context, uint32_t index) {
@@ -37,14 +37,14 @@ void desktop_settings_scene_pin_menu_on_enter(void* context) {
 
         submenu_add_item(
             submenu,
-            "Disable",
+            "Remove PIN",
             SCENE_EVENT_DISABLE_PIN,
             desktop_settings_scene_pin_menu_submenu_callback,
             app);
     }
 
     submenu_set_header(app->submenu, "PIN Code Settings");
-    submenu_set_selected_item(app->submenu, app->menu_idx);
+    submenu_set_selected_item(app->submenu, app->pin_menu_idx);
     view_dispatcher_switch_to_view(app->view_dispatcher, DesktopSettingsAppViewMenu);
 }
 
@@ -76,11 +76,16 @@ bool desktop_settings_scene_pin_menu_on_event(void* context, SceneManagerEvent e
             consumed = true;
             break;
         }
+    } else if(event.type == SceneManagerEventTypeBack) {
+        submenu_set_selected_item(app->submenu, 0);
     }
+
     return consumed;
 }
 
 void desktop_settings_scene_pin_menu_on_exit(void* context) {
     DesktopSettingsApp* app = context;
+
+    app->pin_menu_idx = submenu_get_selected_item(app->submenu);
     submenu_reset(app->submenu);
 }

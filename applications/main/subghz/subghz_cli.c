@@ -344,7 +344,6 @@ void subghz_cli_command_rx(Cli* cli, FuriString* args, void* context) {
     SubGhzCliCommandRx* instance = malloc(sizeof(SubGhzCliCommandRx));
     instance->stream =
         furi_stream_buffer_alloc(sizeof(LevelDuration) * 1024, sizeof(LevelDuration));
-    furi_check(instance->stream);
 
     SubGhzEnvironment* environment = subghz_cli_environment_init();
 
@@ -425,7 +424,6 @@ void subghz_cli_command_rx_raw(Cli* cli, FuriString* args, void* context) {
     SubGhzCliCommandRx* instance = malloc(sizeof(SubGhzCliCommandRx));
     instance->stream =
         furi_stream_buffer_alloc(sizeof(LevelDuration) * 1024, sizeof(LevelDuration));
-    furi_check(instance->stream);
 
     // Configure radio
     furi_hal_subghz_reset();
@@ -1205,7 +1203,7 @@ static bool
     subghz_on_system_start_istream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
     File* file = istream->state;
     size_t ret = storage_file_read(file, buf, count);
-    return (count == ret);
+    return count == ret;
 }
 
 static bool subghz_on_system_start_istream_decode_band(

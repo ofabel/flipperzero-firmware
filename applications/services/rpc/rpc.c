@@ -1,4 +1,3 @@
-#include "profiles/serial_profile.h"
 #include "rpc_i.h"
 
 #include <pb.h>
@@ -233,7 +232,7 @@ bool rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
     rpc_debug_print_data("INPUT", buf, bytes_received);
 #endif
 
-    return (count == bytes_received);
+    return count == bytes_received;
 }
 
 static bool rpc_pb_content_callback(pb_istream_t* stream, const pb_field_t* field, void** arg) {

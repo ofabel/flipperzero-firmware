@@ -6,6 +6,7 @@ enum SubmenuIndex {
     SubmenuIndexWriteBlank,
     SubmenuIndexWriteCopy,
     SubmenuIndexEdit,
+    SubmenuIndexRename,
     SubmenuIndexDelete,
     SubmenuIndexInfo,
 };
@@ -21,15 +22,20 @@ void ibutton_scene_saved_key_menu_on_enter(void* context) {
 
     if(features & iButtonProtocolFeatureWriteBlank) {
         submenu_add_item(
-            submenu, "Write Blank", SubmenuIndexWriteBlank, ibutton_submenu_callback, ibutton);
+            submenu, "Write ID", SubmenuIndexWriteBlank, ibutton_submenu_callback, ibutton);
     }
 
     if(features & iButtonProtocolFeatureWriteCopy) {
         submenu_add_item(
-            submenu, "Write Copy", SubmenuIndexWriteCopy, ibutton_submenu_callback, ibutton);
+            submenu,
+            "Full Write on Same Type",
+            SubmenuIndexWriteCopy,
+            ibutton_submenu_callback,
+            ibutton);
     }
 
     submenu_add_item(submenu, "Edit", SubmenuIndexEdit, ibutton_submenu_callback, ibutton);
+    submenu_add_item(submenu, "Rename", SubmenuIndexRename, ibutton_submenu_callback, ibutton);
     submenu_add_item(submenu, "Delete", SubmenuIndexDelete, ibutton_submenu_callback, ibutton);
     submenu_add_item(submenu, "Info", SubmenuIndexInfo, ibutton_submenu_callback, ibutton);
 
@@ -57,6 +63,8 @@ bool ibutton_scene_saved_key_menu_on_event(void* context, SceneManagerEvent even
             scene_manager_next_scene(scene_manager, iButtonSceneWrite);
         } else if(event.event == SubmenuIndexEdit) {
             scene_manager_next_scene(scene_manager, iButtonSceneAddValue);
+        } else if(event.event == SubmenuIndexRename) {
+            scene_manager_next_scene(scene_manager, iButtonSceneSaveName);
         } else if(event.event == SubmenuIndexDelete) {
             scene_manager_next_scene(scene_manager, iButtonSceneDeleteConfirm);
         } else if(event.event == SubmenuIndexInfo) {

@@ -9,13 +9,12 @@
 #include "../helpers/pin.h"
 #include "../animations/animation_manager.h"
 #include "../views/desktop_events.h"
-#include "../views/desktop_view_pin_input.h"
 #include "../views/desktop_view_locked.h"
 #include "desktop_scene.h"
 #include "desktop_scene_i.h"
 
 #define WRONG_PIN_HEADER_TIMEOUT 3000
-#define INPUT_PIN_VIEW_TIMEOUT 15000
+#define INPUT_PIN_VIEW_TIMEOUT   15000
 
 static void desktop_scene_locked_callback(DesktopEvent event, void* context) {
     Desktop* desktop = (Desktop*)context;

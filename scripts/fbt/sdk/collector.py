@@ -40,7 +40,6 @@ from cxxheaderparser.types import (
 
 from cxxheaderparser.parserstate import (
     State,
-    EmptyBlockState,
     ClassBlockState,
     ExternBlockState,
     NamespaceBlockState,
@@ -192,12 +191,6 @@ class SdkCxxVisitor:
     def on_include(self, state: State, filename: str) -> None:
         pass
 
-    def on_empty_block_start(self, state: EmptyBlockState) -> None:
-        pass
-
-    def on_empty_block_end(self, state: EmptyBlockState) -> None:
-        pass
-
     def on_extern_block_start(self, state: ExternBlockState) -> None:
         pass
 
@@ -241,4 +234,7 @@ class SdkCxxVisitor:
         pass
 
     def on_class_end(self, state: ClassBlockState) -> None:
+        pass
+
+    def on_parse_start(self, state: NamespaceBlockState) -> None:
         pass

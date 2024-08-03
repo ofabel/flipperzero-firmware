@@ -17,8 +17,8 @@
     iButtonProtocolGroupInfo info; \
     ibutton_protocols_get_group_by_id(protocols, (id), &info);
 
-#define GROUP_BASE (info.base)
-#define GROUP_DATA (info.group)
+#define GROUP_BASE  (info.base)
+#define GROUP_DATA  (info.group)
 #define PROTOCOL_ID (info.id)
 
 struct iButtonProtocols {
@@ -285,6 +285,17 @@ bool ibutton_protocols_load(iButtonProtocols* protocols, iButtonKey* key, const 
     furi_record_close(RECORD_STORAGE);
 
     return success;
+}
+
+void ibutton_protocols_render_uid(
+    iButtonProtocols* protocols,
+    const iButtonKey* key,
+    FuriString* result) {
+    const iButtonProtocolId id = ibutton_key_get_protocol_id(key);
+    const iButtonProtocolData* data = ibutton_key_get_protocol_data(key);
+
+    GET_PROTOCOL_GROUP(id);
+    GROUP_BASE->render_uid(GROUP_DATA, data, PROTOCOL_ID, result);
 }
 
 void ibutton_protocols_render_data(

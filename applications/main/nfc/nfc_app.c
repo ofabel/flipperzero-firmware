@@ -50,6 +50,7 @@ NfcApp* nfc_app_alloc(void) {
 
     instance->nfc = nfc_alloc();
 
+    instance->felica_auth = felica_auth_alloc();
     instance->mf_ul_auth = mf_ultralight_auth_alloc();
     instance->slix_unlock = slix_unlock_alloc();
     instance->mfc_key_cache = mf_classic_key_cache_alloc();
@@ -141,6 +142,7 @@ void nfc_app_free(NfcApp* instance) {
 
     nfc_free(instance->nfc);
 
+    felica_auth_free(instance->felica_auth);
     mf_ultralight_auth_free(instance->mf_ul_auth);
     slix_unlock_free(instance->slix_unlock);
     mf_classic_key_cache_free(instance->mfc_key_cache);
@@ -462,13 +464,10 @@ static bool nfc_is_hal_ready(void) {
         // No connection to the chip, show an error screen
         DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
         DialogMessage* message = dialog_message_alloc();
+        dialog_message_set_header(message, "Error: NFC Chip Failed", 64, 0, AlignCenter, AlignTop);
         dialog_message_set_text(
-            message,
-            "Error!\nNFC chip failed to start\n\n\nSend a photo of this to:\nsupport@flipperzero.one",
-            0,
-            0,
-            AlignLeft,
-            AlignTop);
+            message, "Send error photo via\nsupport.flipper.net", 0, 63, AlignLeft, AlignBottom);
+        dialog_message_set_icon(message, &I_err_09, 128 - 25, 64 - 25);
         dialog_message_show(dialogs, message);
         dialog_message_free(message);
         furi_record_close(RECORD_DIALOGS);

@@ -9,7 +9,6 @@
 /**
  * Define IO Authentication
  */
-#define CFG_USED_FIXED_PIN USE_FIXED_PIN_FOR_PAIRING_FORBIDDEN
 #define CFG_ENCRYPTION_KEY_SIZE_MAX (16)
 #define CFG_ENCRYPTION_KEY_SIZE_MIN (8)
 
@@ -17,11 +16,6 @@
  * Define IO capabilities
  */
 #define CFG_IO_CAPABILITY IO_CAP_DISPLAY_YES_NO
-
-/**
- * Define MITM modes
- */
-#define CFG_MITM_PROTECTION MITM_PROTECTION_REQUIRED
 
 /**
  * Define Secure Connections Support
@@ -32,12 +26,12 @@
  * Define PHY
  */
 #define ALL_PHYS_PREFERENCE 0x00
-#define RX_2M_PREFERRED 0x02
-#define TX_2M_PREFERRED 0x02
-#define TX_1M 0x01
-#define TX_2M 0x02
-#define RX_1M 0x01
-#define RX_2M 0x02
+#define RX_2M_PREFERRED     0x02
+#define TX_2M_PREFERRED     0x02
+#define TX_1M               0x01
+#define TX_2M               0x02
+#define RX_1M               0x01
+#define RX_2M               0x02
 
 /******************************************************************************
  * BLE Stack

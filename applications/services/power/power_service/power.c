@@ -3,8 +3,9 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-#define POWER_OFF_TIMEOUT 90
 #define TAG "Power"
+
+#define POWER_OFF_TIMEOUT 90
 
 void power_draw_battery_callback(Canvas* canvas, void* context) {
     furi_assert(context);
@@ -13,7 +14,7 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
 
     if(power->info.gauge_is_ok) {
         canvas_draw_box(canvas, 2, 2, (power->info.charge + 4) / 5, 4);
-        if(power->info.voltage_battery_charge_limit < 4.2) {
+        if(power->info.voltage_battery_charge_limit < 4.2f) {
             // Battery charge voltage limit is modified, indicate with cross pattern
             canvas_invert_color(canvas);
             uint8_t battery_bar_width = (power->info.charge + 4) / 5;
@@ -198,6 +199,8 @@ int32_t power_srv(void* p) {
 
     if(furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal) {
         FURI_LOG_W(TAG, "Skipping start in special boot mode");
+
+        furi_thread_suspend(furi_thread_get_current_id());
         return 0;
     }
 
