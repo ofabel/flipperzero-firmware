@@ -9,7 +9,7 @@ App(
         "js_app_start",
         "py_app",
         "js_app_start",
-        "py_cli_start",
+        #"py_cli_start",
         "py_settings",
         # "archive",
     ],
